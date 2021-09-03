@@ -43,7 +43,7 @@ If you already have a preferred text editor, skip this step.
 We will create a simple frontend app that uses basic HTML & Javascript. 
 
 ### Go into the frontend-simple folder 
--  `cd frontend-simple`
+- Open a terminal and go to the location where `mushroom-app/frontend-simple`
 
 ### Add a `Dockerfile`
 Start with a base docker container with and add the following:
@@ -142,3 +142,18 @@ docker run  --rm --name %IMAGE_NAME% -ti --mount type=bind,source="%cd%",target=
 ### Start Web Server
 - To run development web server run `http-server` from the docker shell
 - Test the web app by going to `http://localhost:8080/`
+
+
+## Backend API Container
+We will create a basic backend container to run our REST API. The FastAPI framework will be used for this.
+
+### Go into the api-service folder 
+- Open a terminal and go to the location where `mushroom-app/api-service`
+
+
+## Data Collector Container
+We will create a python container that can run scripts from the CLI. This can be used to run scripts to download images from Google
+
+### Go into the data-collector folder 
+- Open a terminal and go to the location where `mushroom-app/data-collector`
+
