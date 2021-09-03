@@ -25,3 +25,120 @@ Install `Docker Desktop`
 ### Install VSCode  
 Follow the [instructions](https://code.visualstudio.com/download) for your operating system.  
 If you already have a preferred text editor, skip this step.  
+
+### Make sure we do not have any running containers and clear up an unused images
+* Run `docker container ls`
+* Stop any container that is running
+* Run `docker system prune`
+* Run `docker image ls`
+
+## Create project folders
+- Create a root project folder `mushroom-app`
+- Organize containers into sub folders, create the following folders inside the project folder:
+    * `api-service`
+    * `data-collector`
+    * `frontend-simple`
+
+## Frontend App (Simple) Container
+We will create a simple frontend app that uses basic HTML & Javascript. 
+
+### Go into the frontend-simple folder 
+-  `cd frontend-simple`
+
+### Add a `Dockerfile`
+Start with a base docker container with and add the following:
+- Use a base image slim version fo Debian with node installed
+- Ensure we have an up to date baseline, install dependencies
+- Install `http-server`
+- Create a user so we don't run the app as root, add a user called `app`
+- Create a directory `app`, where we will place all our code
+- Set the owner of the directory as the newly created user
+- Expose port `8080` from the container to the outside for the web server
+- Switch the user to `app` and set the the working directory to `app`
+
+`Dockerfile`
+```
+FROM node:14.9.0-buster-slim
+
+# Update baseline and ensure we don't run the app as root.
+RUN set -ex; \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends openssl && \
+    npm install -g http-server && \
+    useradd -ms /bin/bash app -d /home/app -G sudo -u 2000 -p "$(openssl passwd -1 Passw0rd)" && \
+    mkdir -p /app && \
+    chown app:app /app
+
+EXPOSE 8080
+
+# Switch to the new user
+USER app
+WORKDIR /app
+
+ENTRYPOINT ["/bin/bash"]
+```
+### Add a `docker-shell.sh` or `docker-shell.bat`
+Based on your OS, create a startup script to make building & running the container easy
+
+`docker-shell.sh`
+```
+#!/bin/bash
+
+# exit immediately if a command exits with a non-zero status
+set -e
+
+# Define some environment variables
+# Automatic export to the environment of subsequently executed commands
+# source: the command 'help export' run in Terminal
+export IMAGE_NAME="mushroom-app-frontend-simple"
+export BASE_DIR=$(pwd)
+
+# Build the image based on the Dockerfile
+docker build -t $IMAGE_NAME -f Dockerfile .
+
+# Create the container
+# --mount: Attach a filesystem mount to the container
+# -p: Publish a container's port(s) to the host (host_port: container_port) (source: https://dockerlabs.collabnix.com/intermediate/networking/ExposingContainerPort.html)
+docker run --rm --name $IMAGE_NAME -ti \
+--mount type=bind,source="$BASE_DIR",target=/app \
+-p 8080:8080 $IMAGE_NAME
+```
+
+
+`docker-shell.bat`
+```
+# Define some environment variables
+SET IMAGE_NAME=frontend-app
+SET BASE_DIR=%cd%
+
+# Build the image based on the Dockerfile
+docker build -t %IMAGE_NAME% -f Dockerfile .
+
+# Create the container
+# --mount: Attach a filesystem mount to the container
+# -p: Publish a container's port(s) to the host (host_port: container_port) (source: https://dockerlabs.collabnix.com/intermediate/networking/ExposingContainerPort.html)
+docker run  --rm --name %IMAGE_NAME% -ti --mount type=bind,source="%cd%",target=/app -p 8080:8080 %IMAGE_NAME%
+```
+
+### Add a App home page
+
+`index.html`
+```
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>🍄 Mushroom Identifier</title>
+    </head>
+    <body>
+        Welcome to the mushroom identification App!
+    </body>
+</html>
+```
+
+### Build & Run Container
+- Run `sh docker-shell.sh` or `docker-shell.bat` for windows
+
+### Start Web Server
+- To run development web server run `http-server` from the docker shell
+- Test the web app by going to `http://localhost:8080/`
