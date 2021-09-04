@@ -144,7 +144,7 @@ docker run  --rm --name %IMAGE_NAME% -ti --mount type=bind,source="%cd%",target=
         <title>🍄 Mushroom Identifier</title>
     </head>
     <body>
-        Welcome to the mushroom identification App!
+        🍄 Welcome to the mushroom identification App!
     </body>
 </html>
 ```
@@ -432,9 +432,47 @@ docker run  --rm --name %IMAGE_NAME% -ti ^
 
 ### Start Data Collector Container
 - To run development API service run `uvicorn_server` from the docker shell
-- Test the container is up and running, run `python --version` in the docker shell to verify the version is 3.7
+- Test the container is up and running, run `python --version` in the docker shell to verify the version is `3.7.11`
 
 - To test image download you can run the example command
 
 `python -m cli --nums 10 --search "oyster mushrooms" "crimini mushrooms" "amanita mushrooms" --opp "search"`
 
+## Setup Container with GCP Credentials
+Next step is to enable `data-collector` and `api-service` container to have access to GCP. We want these two container to take to GCP as show:
+
+![Docker setup for Mushroom App](https://storage.googleapis.com/public_colab_images/docker/docker_containers_mushroom_app3.png)
+
+### Setup GCP Service Account
+- This step has already been done since we want to connect the "common" model store you all published to in the Mushroom Classification competition. (The credentials file will be provided to you before this exercise)
+- Here are the step to create an account just for reference:
+- To setup a service account you will need to go to [GCP Console](https://console.cloud.google.com/home/dashboard), search for  "Service accounts" from the top search box. or go to: "IAM & Admins" > "Service accounts" from the top-left menu and create a new service account called "bucket-reader". For "Service account permissions" select "Cloud Storage" > "Storage Bucket Reader". Then click done.
+- This will create a service account
+- On the right "Actions" column click the vertical ... and select "Create key". A prompt for Create private key for "bucket-reader" will appear select "JSON" and click create. This will download a Private key json file to your computer. Copy this json file into the **secrets** folder.
+
+
+### Set GCP Credentials
+- To setup GCP Credentials in a container we need to set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` inside the container to the path of the secrets file from the previous step
+- Update `docker-shell.sh` or `docker-shell.bat` in both `data-collector` and `api-service` to add the new environment variable
+
+`docker-shell.sh`
+```
+export GCP_PROJECT="ai5-project"
+export GCP_ZONE="us-central1-a"
+export GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json
+
+-e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
+-e GCP_PROJECT=$GCP_PROJECT \
+-e GCP_ZONE=$GCP_ZONE \
+```
+
+`docker-shell.bat`
+```
+SET GCP_PROJECT="ai5-project"
+SET GCP_ZONE="us-central1-a"
+SET GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json
+
+-e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS ^
+-e GCP_PROJECT=$GCP_PROJECT ^
+-e GCP_ZONE=$GCP_ZONE ^
+```
