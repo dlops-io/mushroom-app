@@ -269,26 +269,101 @@ docker run --rm --name $IMAGE_NAME -ti \
 ```
 REM Define some environment variables
 SET IMAGE_NAME="mushroom-app-api-server"
-SET BASE_DIR= %cd%
-cd ..
-cd persistent-folder
-SET PERSISTENT_DIR= %cd%
-cd ..
-cd secrets
-SET SECRETS_DIR= %cd%
-cd ..
-cd api-service
 
 REM Build the image based on the Dockerfile
 docker build -t %IMAGE_NAME% -f Dockerfile .
 
 REM Run the container
-docker run  --rm --name $IMAGE_NAME -ti ^
-            --mount type=bind,source="$BASE_DIR",target=/app ^
-            --mount type=bind,source="$PERSISTENT_DIR",target=/persistent ^
-            --mount type=bind,source="$SECRETS_DIR",target=/secrets ^
+cd ..
+docker run  --rm --name %IMAGE_NAME% -ti ^
+            --mount type=bind,source="%cd%\api-service",target=/app ^
+            --mount type=bind,source="%cd%\persistent-folder",target=/persistent ^
+            --mount type=bind,source="%cd%\secrets",target=/secrets ^
             -p 9000:9000 -e DEV=1 %IMAGE_NAME%
 ```
+
+### Add `docker-entrypoint.sh` file
+- The entrypoint file is used to abstract out startup related code outside the `Dockerfile`
+- The entrypoint file can have logic on running code in dev vs production model
+- Here we will create two functions `uvicorn_server` and `uvicorn_server_production` which defines how we want to run the API Server, in Dev or production mode
+
+`docker-entrypoint.sh`
+```
+#!/bin/bash
+
+echo "Container is running!!!"
+
+# this will run the api/service.py file with the instantiated app FastAPI
+uvicorn_server() {
+    uvicorn api.service:app --host 0.0.0.0 --port 9000 --log-level debug --reload --reload-dir api/ "$@"
+}
+
+uvicorn_server_production() {
+    pipenv run uvicorn api.service:app --host 0.0.0.0 --port 9000 --lifespan on
+}
+
+export -f uvicorn_server
+export -f uvicorn_server_production
+
+echo -en "\033[92m
+The following commands are available:
+    uvicorn_server
+        Run the Uvicorn Server
+\033[0m
+"
+
+if [ "${DEV}" = 1 ]; then
+  pipenv shell
+else
+  uvicorn_server_production
+fi
+```
+
+### Add `api/service.py` file
+- The `service.py` will be used to initialize our FastAPI server and define routes
+
+`api/service.py`
+```
+from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
+
+# Setup FastAPI app
+app = FastAPI(
+    title="API Server",
+    description="API Server",
+    version="v1"
+)
+
+# Enable CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=False,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Routes
+@app.get("/")
+async def get_index():
+    return {
+        "message": "Welcome to the API Service"
+    }
+```
+
+### Copy over `Pipfile` & `Pipfile.lock`
+- Since we will start with a similar Python environment as last class
+- Copy over [Pipfile](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/api-service/Pipfile)
+- Copy over [Pipfile.lock](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/api-service/Pipfile.lock)
+
+### Build & Run Container
+- Run `sh docker-shell.sh` or `docker-shell.bat` for windows
+
+### Start API Service
+- To run development API service run `uvicorn_server` from the docker shell
+- Test the API service by going to `http://localhost:9000/`
+
+
 
 ## Data Collector Container
 We will create a python container that can run scripts from the CLI. This can be used to run scripts to download images from Google
