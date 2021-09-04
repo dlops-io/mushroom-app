@@ -67,6 +67,7 @@ Start with a base docker container with and add the following:
 - Set the owner of the directory as the newly created user
 - Expose port `8080` from the container to the outside for the web server
 - Switch the user to `app` and set the the working directory to `app`
+- Set the entrypoint of the container to `bash`
 
 `Dockerfile`
 ```
@@ -109,7 +110,7 @@ export BASE_DIR=$(pwd)
 # Build the image based on the Dockerfile
 docker build -t $IMAGE_NAME -f Dockerfile .
 
-# Create the container
+# Run the container
 # --mount: Attach a filesystem mount to the container
 # -p: Publish a container's port(s) to the host (host_port: container_port) (source: https://dockerlabs.collabnix.com/intermediate/networking/ExposingContainerPort.html)
 docker run --rm --name $IMAGE_NAME -ti \
@@ -127,7 +128,7 @@ SET BASE_DIR=%cd%
 REM Build the image based on the Dockerfile
 docker build -t %IMAGE_NAME% -f Dockerfile .
 
-REM Create the container
+REM Run the container
 REM --mount: Attach a filesystem mount to the container
 REM -p: Publish a container's port(s) to the host (host_port: container_port) (source: https://dockerlabs.collabnix.com/intermediate/networking/ExposingContainerPort.html)
 docker run  --rm --name %IMAGE_NAME% -ti --mount type=bind,source="%cd%",target=/app -p 8080:8080 %IMAGE_NAME%
@@ -162,6 +163,132 @@ We will create a basic backend container to run our REST API. The FastAPI framew
 ### Go into the api-service folder 
 - Open a terminal and go to the location where `mushroom-app/api-service`
 
+### Add a `Dockerfile`
+Start with a base docker container with and add the following:
+- Use a base image slim version fo Debian with python 3.8 installed
+- Ensure we have an up to date baseline, install dependencies
+- Upgrade `pip` & Install `pipenv`
+- Create a user so we don't run the app as root, add a user called `app`
+- Create a directory `app`, where we will place all our code
+- Set the owner of the directory as the newly created user
+- Expose port `9000` from the container to the outside for the api server
+- Switch the user to `app` and set the the working directory to `app`
+- Install python packages using the `Pipfile` & `Pipfile.lock`
+- Execute  `pipenv sync` to ensure we have the updated python environment
+- Set the entrypoint of the docker container to `bash` and call the script `docker-entrypoint.sh`
+
+`Dockerfile`
+```
+# Use the official Debian-hosted Python image
+FROM python:3.8-slim-buster
+
+ARG DEBIAN_PACKAGES="build-essential git"
+
+# Prevent apt from showing prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Python wants UTF-8 locale
+ENV LANG=C.UTF-8
+
+# Tell pipenv where the shell is. This allows us to use "pipenv shell" as a
+# container entry point.
+ENV PYENV_SHELL=/bin/bash
+
+# Tell Python to disable buffering so we don't lose any logs.
+ENV PYTHONUNBUFFERED=1
+
+# Ensure we have an up to date baseline, install dependencies and
+# create a user so we don't run the app as root
+RUN set -ex; \
+    for i in $(seq 1 8); do mkdir -p "/usr/share/man/man${i}"; done && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends $DEBIAN_PACKAGES && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install pipenv && \
+    useradd -ms /bin/bash app -d /home/app -u 1000 -p "$(openssl passwd -1 Passw0rd)" && \
+    mkdir -p /app && \
+    chown app:app /app
+
+# Expose port
+EXPOSE 9000
+
+# Switch to the new user
+USER app
+WORKDIR /app
+
+# Install python packages
+ADD --chown=app:app Pipfile Pipfile.lock /app/
+
+RUN pipenv sync
+
+# Add the rest of the source code. This is done last so we don't invalidate all
+# layers when we change a line of code.
+ADD --chown=app:app . /app
+
+# Entry point
+ENTRYPOINT ["/bin/bash","./docker-entrypoint.sh"]
+```
+
+### Add a `docker-shell.sh` or `docker-shell.bat`
+Based on your OS, create a startup script to make building & running the container easy
+
+`docker-shell.sh`
+```
+#!/bin/bash
+
+# exit immediately if a command exits with a non-zero status
+set -e
+
+# Define some environment variables
+# Automatic export to the environment of subsequently executed commands
+# source: the command 'help export' run in Terminal
+export IMAGE_NAME="mushroom-app-api-service"
+export BASE_DIR=$(pwd)
+export PERSISTENT_DIR=$(pwd)/../persistent-folder/
+export SECRETS_DIR=$(pwd)/../secrets/
+
+# Build the image based on the Dockerfile
+docker build -t $IMAGE_NAME -f Dockerfile .
+
+# Run the container
+# --mount: Attach a filesystem mount to the container
+# -p: Publish a container's port(s) to the host (host_port: container_port) (source: https://dockerlabs.collabnix.com/intermediate/networking/ExposingContainerPort.html)
+docker run --rm --name $IMAGE_NAME -ti \
+--mount type=bind,source="$BASE_DIR",target=/app \
+--mount type=bind,source="$PERSISTENT_DIR",target=/persistent \
+--mount type=bind,source="$SECRETS_DIR",target=/secrets \
+-p 9000:9000 \
+-e DEV=1 $IMAGE_NAME
+```
+
+
+`docker-shell.bat`
+```
+REM Define some environment variables
+SET IMAGE_NAME="mushroom-app-api-server"
+SET BASE_DIR= %cd%
+cd ..
+cd persistent-folder
+SET PERSISTENT_DIR= %cd%
+cd ..
+cd secrets
+SET SECRETS_DIR= %cd%
+cd ..
+cd api-service
+
+REM Build the image based on the Dockerfile
+docker build -t %IMAGE_NAME% -f Dockerfile .
+
+REM Run the container
+docker run  --rm --name $IMAGE_NAME -ti ^
+            --mount type=bind,source="$BASE_DIR",target=/app ^
+            --mount type=bind,source="$PERSISTENT_DIR",target=/persistent ^
+            --mount type=bind,source="$SECRETS_DIR",target=/secrets ^
+            -p 9000:9000 -e DEV=1 %IMAGE_NAME%
+```
 
 ## Data Collector Container
 We will create a python container that can run scripts from the CLI. This can be used to run scripts to download images from Google
