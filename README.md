@@ -108,16 +108,16 @@ docker run --rm --name $IMAGE_NAME -ti \
 
 `docker-shell.bat`
 ```
-# Define some environment variables
+REM Define some environment variables
 SET IMAGE_NAME=frontend-app
 SET BASE_DIR=%cd%
 
-# Build the image based on the Dockerfile
+REM Build the image based on the Dockerfile
 docker build -t %IMAGE_NAME% -f Dockerfile .
 
-# Create the container
-# --mount: Attach a filesystem mount to the container
-# -p: Publish a container's port(s) to the host (host_port: container_port) (source: https://dockerlabs.collabnix.com/intermediate/networking/ExposingContainerPort.html)
+REM Create the container
+REM --mount: Attach a filesystem mount to the container
+REM -p: Publish a container's port(s) to the host (host_port: container_port) (source: https://dockerlabs.collabnix.com/intermediate/networking/ExposingContainerPort.html)
 docker run  --rm --name %IMAGE_NAME% -ti --mount type=bind,source="%cd%",target=/app -p 8080:8080 %IMAGE_NAME%
 ```
 
