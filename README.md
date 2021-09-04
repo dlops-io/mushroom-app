@@ -7,7 +7,7 @@ In this tutorial we will setup three containers:
 
 The following container architecture is what we will implement:
 
-![Docker setup for Mushroom App](https://storage.googleapis.com/public_colab_images/docker/docker_containers_mushroom_app1.png)
+![Docker setup for Mushroom App](https://storage.googleapis.com/public_colab_images/docker/docker_containers_mushroom_app2.png)
 
 ## Prerequisites
 * Have Docker installed
@@ -38,6 +38,18 @@ If you already have a preferred text editor, skip this step.
     * `api-service`
     * `data-collector`
     * `frontend-simple`
+
+- Create a folder called `persistent-folder` inside the root project folder
+- Create a folder called `secrets` inside the root project folder
+- Add a `.gitignore` file at the root project folder. 
+
+### **We do not want to push the content in `persistent-folder` and `secrets` to GitHUb**
+
+`.gitignore`
+```
+/persistent-folder
+/secrets
+```
 
 ## Frontend App (Simple) Container
 We will create a simple frontend app that uses basic HTML & Javascript. 

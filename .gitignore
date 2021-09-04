@@ -1,2 +1,4 @@
 # misc
 .DS_Store
+/persistent-folder
+/secrets
