@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from api.tracker import TrackerService
+import dataaccess.session as database_session
 
 # Initialize Tracker Service
 tracker_service = TrackerService()
@@ -27,6 +28,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     # Startup tasks
+    # Connect to database
+    await database_session.connect()
     # Start the tracker service
     asyncio.create_task(tracker_service.track())
 
@@ -34,7 +37,8 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     # Shutdown tasks
-    ...
+    # Disconnect from database
+    await database_session.disconnect()
 
 # Routes
 

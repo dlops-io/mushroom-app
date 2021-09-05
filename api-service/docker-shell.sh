@@ -28,4 +28,6 @@ docker run --rm --name $IMAGE_NAME -ti \
 -e DEV=1 \
 -e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
 -e GCP_PROJECT=$GCP_PROJECT \
--e GCP_ZONE=$GCP_ZONE $IMAGE_NAME
+-e GCP_ZONE=$GCP_ZONE \
+-e DATABASE_URL=postgres://mushroomapp:awesome@mushroomappdb-server:5432/mushroomappdb \
+--network mushroomappnetwork $IMAGE_NAME

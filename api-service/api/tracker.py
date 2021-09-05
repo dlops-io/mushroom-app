@@ -8,6 +8,8 @@ import pandas as pd
 import tensorflow as tf
 from google.cloud import storage
 
+from dataaccess.session import database
+
 gcp_project = os.environ["GCP_PROJECT"]
 bucket_name = "ai5-mushroom-app-models"
 local_experiments_path = "/persistent/experiments"
@@ -142,6 +144,64 @@ def download_best_models():
         print("Error in download_best_models")
 
 
+async def save_leaderboard_db():
+    # read leaderboard
+    df = pd.read_csv(local_experiments_path+"/leaderboard.csv")
+    print("Shape:", df.shape)
+    print(df.head())
+
+    # Delete current data in table
+    query = "delete from leaderboard;"
+    print("query:", query)
+    await database.execute(query)
+
+    # Insert rows
+    query = f"""
+        INSERT INTO leaderboard (
+                trainable_parameters ,
+                execution_time ,
+                loss ,
+                accuracy ,
+                model_size ,
+                learning_rate ,
+                batch_size ,
+                epochs ,
+                optimizer ,
+                email ,
+                experiment ,
+                model_name 
+            ) VALUES (
+                :trainable_parameters ,
+                :execution_time ,
+                :loss ,
+                :accuracy ,
+                :model_size ,
+                :learning_rate ,
+                :batch_size ,
+                :epochs ,
+                :optimizer ,
+                :email ,
+                :experiment ,
+                :model_name 
+            );
+       """
+    for index, row in df.iterrows():
+        await database.execute(query, {
+            "trainable_parameters": row["trainable_parameters"],
+            "execution_time": row["execution_time"],
+            "loss": row["loss"],
+            "accuracy": row["accuracy"],
+            "model_size": row["model_size"],
+            "learning_rate": row["learning_rate"],
+            "batch_size": row["batch_size"],
+            "epochs": row["epochs"],
+            "optimizer": row["optimizer"],
+            "email": row["user"],
+            "experiment": row["experiment"],
+            "model_name": row["model_name"]
+        })
+
+
 class TrackerService:
     def __init__(self):
         self.timestamp = 0
@@ -160,6 +220,9 @@ class TrackerService:
 
                 # Compute Leaderboard and find best model
                 compute_leaderboard()
+
+                # Saving leaderboard
+                await save_leaderboard_db()
 
                 # Set the timestamp of the last file processed
                 self.timestamp = timestamp
