@@ -476,3 +476,105 @@ SET GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json
 -e GCP_PROJECT=$GCP_PROJECT ^
 -e GCP_ZONE=$GCP_ZONE ^
 ```
+
+### Test GCP Credentials
+- Restart both `data-collector` and `api-service` so that the new environment variables we added should take effect
+- Install `google-auth` & `google-cloud-storage` python packages
+- Run this in the `data-collector` docker shell
+```
+pipenv install google-auth google-cloud-storage
+```
+
+- Run this in `api-service` docker shell
+```
+pipenv install google-auth google-cloud-storage
+```
+
+- In the `data-collector` create a python file called `test_bucket_access.py` and add the following code to it
+
+`test_bucket_access.py`
+```
+import os
+from google.cloud import storage
+
+
+gcp_project = os.environ["GCP_PROJECT"]
+bucket_name = "ai5-mushroom-app-models"
+persistent_folder = "/persistent"
+
+
+def download_blob(bucket_name, source_blob_name, destination_file_name):
+    """Downloads a blob from the bucket."""
+
+    storage_client = storage.Client(project=gcp_project)
+
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(source_blob_name)
+    blob.download_to_filename(destination_file_name)
+
+
+print(gcp_project)
+
+# Test access
+download_file = "test-bucket-access.txt"
+download_blob(bucket_name, download_file,
+              os.path.join(persistent_folder, download_file))
+```
+
+- Run the following
+```
+python test_bucket_access.py
+```
+
+If you followed all the steps above you should see a file called `test-bucket-access.txt` inside your `persistent-folder`. This file was copied from the GCP bucket over to your local folder. This ensures us we have read access to the GCP bucket.
+
+
+## Download Models for App
+Next step have the `api-service` monitor the GCP bucket for any new models and pull download the best model. We ill also keep track of a leaderboard.
+
+### Setup a Tracker
+- Install `tensorflow`
+
+- Run this in `api-service` docker shell
+```
+pipenv install tensorflow
+```
+
+- Add a python file [api/tracker.py](https://github.com/dlops-io/mushroom-app/releases/download/v1.1/tracker.py)
+-
+- Update `service.py` to initiate `TrackerService` and call it on startup
+- Add the following new imports
+```
+import asyncio
+from api.tracker import TrackerService
+```
+
+- Add code to initialize the tracker, this can be right before "Setup FastAPI app"
+```
+# Initialize Tracker Service
+tracker_service = TrackerService()
+```
+
+- Add startup and shutdown events, add this after "Enable CORSMiddleware"
+```
+@app.on_event("startup")
+async def startup():
+    # Startup tasks
+    # Start the tracker service
+    asyncio.create_task(tracker_service.track())
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    # Shutdown tasks
+    ...
+```
+
+### Run the API Service and test
+- Run `uvicorn_server` and wait for 60 seconds
+
+
+
+
+
+
