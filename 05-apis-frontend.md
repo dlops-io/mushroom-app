@@ -16,7 +16,7 @@ The following container architecture is what we have built so far:
 - Ensure `api-service` is running and accessible at `http://localhost:9000/`. Run `uvicorn_server` to make sure API Service is running.
 - Ensure `frontend-simple` is running and accessible at `http://localhost:8080/`. Run `http-server` to make sure web server is running.
 
-## Create API for the leaderboard list
+## Create API for the leaderboard list [`api-service` Container]
 
 In this section we will query the database for the leaderboard and return it to the API as a list of json objects
 
@@ -86,3 +86,81 @@ async def get_leaderboard():
 * We read some data from a table in a **PostgreSQL** container. 
 * Converted the data to list of dictionary objects in **Python** 
 * Exposed the results as a REST API using **FastAPI**
+
+## Create a leaderboard page [`frontend-simple` Container]
+
+In this section we will consume our leaderboard API and display a table of results.
+
+### First we add a new HTML page 
+- In the `frontend-simple` folder add a new file called `leaderboard.html`
+- Add the following code inside `leaderboard.html`
+
+`leaderboard.html`
+```
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>🍄 Mushroom Identifier: Leaderboard</title>
+    <!-- Add reference to Google fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Google Material Design Styles -->
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <!-- Add javascript package axios for accesing APIs -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- Add Stylesheet -->
+    <style>
+        body {
+            margin: 0;
+            background-color: #efefef;
+        }
+
+        .mdc-top-app-bar {
+            background-color: #1c4385;
+        }
+
+        .content {
+
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 650px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="mdc-top-app-bar" style="align-items: center;position: relative;">
+        <div class="mdc-top-app-bar__row" style="max-width: 700px;">
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button"
+                    aria-label="Open navigation menu">menu</button>
+                <span class="mdc-top-app-bar__title" style="font-weight: 900; font-size: 30px;">🍄 Mushroom
+                    Identifier</span>
+            </section>
+        </div>
+    </header>
+    <!-- Header -->
+
+    <!-- Content -->
+    <div class="content">
+
+    </div>
+    <!-- Content -->
+</body>
+<!-- Add Javascript -->
+<script>
+
+</script>
+
+</html>
+```
