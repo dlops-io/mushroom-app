@@ -444,6 +444,7 @@ Next step is to enable `data-collector` and `api-service` container to have acce
 
 ### Setup GCP Service Account
 - This step has already been done since we want to connect the "common" model store you all published to in the Mushroom Classification competition. (The credentials file will be provided to you before this exercise)
+- **THE FOLLOWING STEPS ARE FYI (NOT REQUIRED FOR THIS EXERCISE)**
 - Here are the step to create an account just for reference:
 - To setup a service account you will need to go to [GCP Console](https://console.cloud.google.com/home/dashboard), search for  "Service accounts" from the top search box. or go to: "IAM & Admins" > "Service accounts" from the top-left menu and create a new service account called "bucket-reader". For "Service account permissions" select "Cloud Storage" > "Storage Bucket Reader". Then click done.
 - This will create a service account
