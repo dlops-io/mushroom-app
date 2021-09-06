@@ -80,8 +80,8 @@ def agg_experiments():
 
         with open(mm_file) as json_file:
             model_metrics = json.load(json_file)
-            model_metrics["user"] = path_splits[2]
-            model_metrics["experiment"] = path_splits[3]
+            model_metrics["user"] = path_splits[-3]
+            model_metrics["experiment"] = path_splits[-2]
             model_metrics["model_name"] = path_splits[-1].replace(
                 "_model_metrics.json", "")
             all_models_metrics.append(model_metrics)
