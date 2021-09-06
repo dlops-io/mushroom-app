@@ -82,5 +82,7 @@ async def get_leaderboard():
 
 - You can access this new route from the browser at 'http://localhost:9000/leaderboard'
 
-🎉 What did we just do? 
-* We read some data from a table in a **PostgreSQL** container. Converted the data to list of dictionary objects in **Python** and exposed the results as a REST API using **FastAPI**
+### 🎉 What did we just do? 
+* We read some data from a table in a **PostgreSQL** container. 
+* Converted the data to list of dictionary objects in **Python** 
+* Exposed the results as a REST API using **FastAPI**
