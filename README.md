@@ -422,7 +422,7 @@ docker build -t %IMAGE_NAME% -f Dockerfile .
 REM Run the container
 cd ..
 docker run  --rm --name %IMAGE_NAME% -ti ^
-            --mount type=bind,source="%cd%\api-service",target=/app ^
+            --mount type=bind,source="%cd%\data-collector",target=/app ^
             --mount type=bind,source="%cd%\persistent-folder",target=/persistent ^
             --mount type=bind,source="%cd%\secrets",target=/secrets %IMAGE_NAME%
 ```
@@ -472,7 +472,414 @@ SET GCP_PROJECT="ai5-project"
 SET GCP_ZONE="us-central1-a"
 SET GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json
 
--e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS ^
--e GCP_PROJECT=$GCP_PROJECT ^
--e GCP_ZONE=$GCP_ZONE ^
+-e GOOGLE_APPLICATION_CREDENTIALS="%GOOGLE_APPLICATION_CREDENTIALS%" ^
+-e GCP_PROJECT="%GCP_PROJECT%" ^
+-e GCP_ZONE="%GCP_ZONE%" ^
 ```
+
+### Test GCP Credentials
+- Restart both `data-collector` and `api-service` so that the new environment variables we added should take effect
+- Install `google-auth` & `google-cloud-storage` python packages
+- Run this in the `data-collector` docker shell
+```
+pipenv install google-auth google-cloud-storage
+```
+
+- Run this in `api-service` docker shell
+```
+pipenv install google-auth google-cloud-storage
+```
+
+- In the `data-collector` create a python file called `test_bucket_access.py` and add the following code to it
+
+`test_bucket_access.py`
+```
+import os
+from google.cloud import storage
+
+
+gcp_project = os.environ["GCP_PROJECT"]
+bucket_name = "ai5-mushroom-app-models"
+persistent_folder = "/persistent"
+
+
+def download_blob(bucket_name, source_blob_name, destination_file_name):
+    """Downloads a blob from the bucket."""
+
+    storage_client = storage.Client(project=gcp_project)
+
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(source_blob_name)
+    blob.download_to_filename(destination_file_name)
+
+
+print(gcp_project)
+
+# Test access
+download_file = "test-bucket-access.txt"
+download_blob(bucket_name, download_file,
+              os.path.join(persistent_folder, download_file))
+```
+
+- Run the following
+```
+python test_bucket_access.py
+```
+
+If you followed all the steps above you should see a file called `test-bucket-access.txt` inside your `persistent-folder`. This file was copied from the GCP bucket over to your local folder. This ensures us we have read access to the GCP bucket.
+
+
+## Download Models for App
+Next step have the `api-service` monitor the GCP bucket for any new models and pull download the best model. We ill also keep track of a leaderboard.
+
+### Setup a Tracker
+- Install `tensorflow`
+
+- Run this in `api-service` docker shell
+```
+pipenv install tensorflow
+```
+
+- Add a python file [api/tracker.py](https://github.com/dlops-io/mushroom-app/releases/download/v1.1/tracker.py)
+
+- Update `service.py` to initiate `TrackerService` and call it on startup
+- Add the following new imports
+```
+import asyncio
+from api.tracker import TrackerService
+```
+
+- Add code to initialize the tracker, this can be right before "Setup FastAPI app"
+```
+# Initialize Tracker Service
+tracker_service = TrackerService()
+```
+
+- Add startup and shutdown events, add this after "Enable CORSMiddleware"
+```
+@app.on_event("startup")
+async def startup():
+    # Startup tasks
+    # Start the tracker service
+    asyncio.create_task(tracker_service.track())
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    # Shutdown tasks
+    ...
+```
+
+### Run the API Service and test
+- Run `uvicorn_server` and wait for 60 seconds
+
+## Database Server Container
+
+In the this section we will be setting up containers so that they talk to each other. The following architecture shows what we are going to do today:
+
+![Docker with Persistent Store](https://storage.googleapis.com/public_colab_images/docker/docker_with_network.png)
+
+Here we will setup a database server and a database client. We will use PostgreSQL as our database server and [dbmate](https://github.com/amacneil/dbmate) as our database client and migration tool. 
+
+### Create the Database Container
+- Create a folder `database-server`
+- For this container we will use a docker compose file
+- Create a file `docker-compose.yml` inside the folder `database-server`
+- Add the following code
+
+`docker-compose.yml`
+```
+version: "3.8"
+services:
+    # we have two services here, mushroomappdb-client and mushroomappdb-server
+    # this client depends on the server
+    mushroomappdb-client:
+        # source: https://github.com/amacneil/dbmate#postgresql
+        # Dbmate is a database migration tool, to keep your database schema in sync across multiple developers and your production servers
+        # keeps track of migrations, and runs it in an order; the power of dbmate is to manage migrations of the script; Shivas uses DataGrip to manage; “dbmate rollback” removes stuff; “dbmate up” creates the table; When we run this “sh ./docker-shell.sh”, I can get the same database setup as Shivas on his end
+        image: amacneil/dbmate
+        container_name: mushroomappdb-client
+        entrypoint: /bin/sh
+        depends_on:
+            - mushroomappdb-server
+        # source: https://docs.docker.com/storage/volumes/
+        # Volumes are the preferred mechanism for persisting data generated by and used by Docker containers. While bind mounts are dependent on the directory structure and OS of the host machine, volumes are completely managed by Docker
+        volumes:
+            - ./db:/db
+        environment: 
+            DATABASE_URL: "postgres://mushroomapp:awesome@mushroomappdb-server:5432/mushroomappdb?sslmode=disable"
+    mushroomappdb-server:
+        # The database is for the metadata (e.g. when a model predicts, keep track of the prediction results)
+        image: postgres
+        container_name: mushroomappdb-server
+        volumes:
+            - ./docker-volumes/postgres:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_USER: mushroomapp
+            POSTGRES_PASSWORD: awesome
+            POSTGRES_DB: mushroomappdb
+        command: -p 5432
+networks:
+    default:
+        name: mushroomappnetwork
+```
+
+- Create a file `docker-shell.sh` or `docker-shell.bat` inside  inside the folder `database-server`
+
+`docker-shell.sh`
+```
+#!/bin/bash
+
+# sources: https://www.gnu.org/savannah-checkouts/gnu/bash/manual/bash.html#index-set; https://unix.stackexchange.com/questions/255581/what-does-set-command-without-arguments-do/255588; the command 'help set' run in Terminal
+# `set -e` will exit immediately if a command exits with a non-zero status
+set -e
+
+# Create the network if we don't have it yet
+# sources: https://dockerlabs.collabnix.com/networking/A1-network-basics.html#docker_network; in terminal, run "docker network inspect"
+# The docker network command is the main command for configuring and managing container networks.
+# what this is saying here is to inspect the network (Display detailed information on one or more networks) if the network exists; if it does not exist, then create the network
+docker network inspect mushroomappnetwork >/dev/null 2>&1 || docker network create mushroomappnetwork
+
+# Run Postgres DB and DBMate
+# sources: https://dockerlabs.collabnix.com/intermediate/workshop/; in Terminal, run "docker-compose run"; https://dockerlabs.collabnix.com/intermediate/workshop/DockerCompose/Difference_between_dockerfile_and_docker_compose.html
+# Docker compose is a tool built by docker to ease the task of creating and configuring multiple containers in a development environment; the counter-part of docker-compose for production environments is docker-swarm. Docker compose takes as input a YAML configuration file (docker-compose.yml) and creates the resources (containers, networks, volumes etc.) by communicating with the docker daemon through docker api.
+# A Dockerfile is a text document that contains all the commands/Instruction a user could call on the command line to assemble an image. On the other hand, Docker Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration. By default, docker-compose expects the name of the Compose file as docker-compose.yml or docker-compose.yaml. If the compose file have different name we can specify it with -f flag.
+
+# "docker-compose run" means to Run a one-off command on a service
+# "--rm" means to Remove container after run. Ignored in detached mode.
+# "--service-ports" means to Run command with the service's ports enabled and mapped to the host
+docker-compose run --rm --service-ports mushroomappdb-client
+```
+
+`docker-shell.bat`
+```
+# Create the network if we don't have it yet
+# sources: https://dockerlabs.collabnix.com/networking/A1-network-basics.html#docker_network; in terminal, run "docker network inspect"
+# The docker network command is the main command for configuring and managing container networks.
+# what this is saying here is to inspect the network (Display detailed information on one or more networks) if the network exists; if it does not exist, then create the network
+docker network inspect mushroomappnetwork >NUL || docker network create mushroomappnetwork
+
+# Run Postgres DB and DBMate
+# sources: https://dockerlabs.collabnix.com/intermediate/workshop/; in Terminal, run "docker-compose run"; https://dockerlabs.collabnix.com/intermediate/workshop/DockerCompose/Difference_between_dockerfile_and_docker_compose.html
+# Docker compose is a tool built by docker to ease the task of creating and configuring multiple containers in a development environment; the counter-part of docker-compose for production environments is docker-swarm. Docker compose takes as input a YAML configuration file (docker-compose.yml) and creates the resources (containers, networks, volumes etc.) by communicating with the docker daemon through docker api.
+# A Dockerfile is a text document that contains all the commands/Instruction a user could call on the command line to assemble an image. On the other hand, Docker Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application’s services. Then, with a single command, you create and start all the services from your configuration. By default, docker-compose expects the name of the Compose file as docker-compose.yml or docker-compose.yaml. If the compose file have different name we can specify it with -f flag.
+
+# "docker-compose run" means to Run a one-off command on a service
+# "--rm" means to Remove container after run. Ignored in detached mode.
+# "--service-ports" means to Run command with the service's ports enabled and mapped to the host
+docker-compose run --rm --service-ports --name database-client mushroomappdb-client
+```
+
+### Starting the Container
+Type the command 
+-  `cd database-server`
+- Run `sh docker-shell.sh` or `docker-shell.bat` for windows
+- Can exit the docker shell without shutting down by typing `ctrl+d`
+- Can reconnect to docker shell by typing...
+- Check migration status: `dbmate status`
+- To shut down docker container, type `ctrl+c`
+
+#### Connecting to the database
+* Run `psql postgres://mushroomapp:awesome@mushroomappdb-server:5432/mushroomappdb` in the docker shell
+* Format to connect to postgres: postgres://<user is>:<password>@i<database server>:<port>/<database name>
+
+* Since we do not have any tables created we can check on some system tables, Run this select query `select table_catalog,table_schema,table_name,table_type from information_schema.tables limit 10;`
+
+* Next let us create a table in the database
+* Exit from the DB prompt so we are back in the dbmate prompt
+* Run `dbmate new leaderboard`, this will create a migration file
+
+#### Dbmate Commands Reference
+
+```sh
+dbmate --help    # print usage help
+dbmate new       # generate a new migration file
+dbmate up        # create the database (if it does not already exist) and run any pending migrations
+dbmate create    # create the database
+dbmate drop      # drop the database
+dbmate migrate   # run any pending migrations
+dbmate rollback  # roll back the most recent migration
+dbmate down      # alias for rollback
+dbmate status    # show the status of all migrations (supports --exit-code and --quiet)
+dbmate dump      # write the database schema.sql file
+dbmate wait      # wait for the database server to become available
+```
+
+* In the migration file we just created added the following table creation scripts:
+```
+CREATE TABLE leaderboard (
+    id BIGSERIAL PRIMARY KEY,
+    trainable_parameters NUMERIC,
+    execution_time NUMERIC,
+    loss NUMERIC,
+    accuracy NUMERIC,
+    model_size NUMERIC,
+    learning_rate NUMERIC,
+    batch_size NUMERIC,
+    epochs NUMERIC,
+    optimizer TEXT,
+    email TEXT,
+    experiment TEXT,
+    model_name TEXT
+);
+
+DROP TABLE IF EXISTS leaderboard;
+```
+
+* Run the DB migration so we create the table in the database. Run `dbmate up` (see db/migrations for what tables are created).
+* Run `psql postgres://mushroomapp:awesome@mushroomappdb-server:5432/mushroomappdb` in the docker shell and run the query `select * from leaderboard;` The table should exist but no data.
+* Exit from the DB prompt so we are back in the dbmate prompt
+* Run `dbmate rollback` to test our removing tables from the database
+* Run `dbmate up` again so we have the new table for storing image meta data in our database
+
+
+### Connecting `data-collector` and `api-service` to `database-server`
+- In `data-collector` & `api-service` modify `docker-shell.sh` or `docker-shell.bat`
+-
+
+```
+# Create the network if we don't have it yet
+docker network inspect mushroomappnetwork >/dev/null 2>&1 || docker network create mushroomappnetwork
+```
+
+```
+REM Create the network if we don't have it yet
+docker network inspect mushroomappnetwork >NUL || docker network create mushroomappnetwork
+```
+
+- Modify the docker run command to attach the container to the network `mushroomappnetwork`
+
+Add this additional argument
+```
+-e DATABASE_URL=postgres://mushroomapp:awesome@mushroomappdb-server:5432/mushroomappdb
+```
+```
+--network mushroomappnetwork
+```
+
+Your docker run command should look something like this:
+```
+docker run --rm --name $IMAGE_NAME -ti \
+--mount type=bind,source="$BASE_DIR",target=/app \
+--mount type=bind,source="$PERSISTENT_DIR",target=/persistent \
+--mount type=bind,source="$SECRETS_DIR",target=/secrets \
+-p 9000:9000 \
+-e DEV=1 \
+-e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
+-e GCP_PROJECT=$GCP_PROJECT \
+-e GCP_ZONE=$GCP_ZONE \
+-e DATABASE_URL=postgres://mushroomapp:awesome@mushroomappdb-server:5432/mushroomappdb \
+--network mushroomappnetwork $IMAGE_NAME
+```
+
+
+### Restart `api-service`
+- Exit from docker shell and run `docker-shell` to get back in
+- Add a python file [dataccess/session.py](https://github.com/dlops-io/mushroom-app/releases/download/v1.1/session.py)
+
+- Update `service.py` connect to database on startup
+- Add the following new imports
+```
+import dataaccess.session as database_session
+```
+
+
+- Add startup and shutdown events, add this after "Enable CORSMiddleware"
+```
+@app.on_event("startup")
+async def startup():
+    # Startup tasks
+    # Connect to database
+    await database_session.connect()
+    # Start the tracker service
+    asyncio.create_task(tracker_service.track())
+
+@app.on_event("shutdown")
+async def shutdown():
+    # Shutdown tasks
+    # Disconnect from database
+    await database_session.disconnect()
+```
+
+### Run the API Service and test connection to DB
+- Run `uvicorn_server` and ensure no errors in the terminal
+
+### Save Leaderboard into DB
+- Update `tracker.py`
+- Add an import so we can connect to DB
+```
+from dataaccess.session import database
+```
+- Add this method:
+```
+async def save_leaderboard_db():
+    # read leaderboard
+    df = pd.read_csv(local_experiments_path+"/leaderboard.csv")
+    print("Shape:", df.shape)
+    print(df.head())
+
+    # Delete current data in table
+    query = "delete from leaderboard;"
+    print("query:", query)
+    await database.execute(query)
+
+    # Insert rows
+    query = f"""
+        INSERT INTO leaderboard (
+                trainable_parameters ,
+                execution_time ,
+                loss ,
+                accuracy ,
+                model_size ,
+                learning_rate ,
+                batch_size ,
+                epochs ,
+                optimizer ,
+                email ,
+                experiment ,
+                model_name 
+            ) VALUES (
+                :trainable_parameters ,
+                :execution_time ,
+                :loss ,
+                :accuracy ,
+                :model_size ,
+                :learning_rate ,
+                :batch_size ,
+                :epochs ,
+                :optimizer ,
+                :email ,
+                :experiment ,
+                :model_name 
+            );
+       """
+    for index, row in df.iterrows():
+        await database.execute(query, {
+            "trainable_parameters": row["trainable_parameters"],
+            "execution_time": row["execution_time"],
+            "loss": row["loss"],
+            "accuracy": row["accuracy"],
+            "model_size": row["model_size"],
+            "learning_rate": row["learning_rate"],
+            "batch_size": row["batch_size"],
+            "epochs": row["epochs"],
+            "optimizer": row["optimizer"],
+            "email": row["user"],
+            "experiment": row["experiment"],
+            "model_name": row["model_name"]
+        })
+```
+
+- Call the above method in the loop:
+```
+# Compute Leaderboard and find best model
+compute_leaderboard()
+
+# Saving leaderboard
+await save_leaderboard_db()
+```
+
+
+
