@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>🍄 Mushroom Identifier</title>
+    <!-- Add reference to Google fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Google Material Design Styles -->
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <!-- Add javascript package axios for accessing APIs -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- Add Stylesheet -->
+    <style>
+        body {
+            margin: 0;
+            background-color: #efefef;
+        }
+
+        .mdc-top-app-bar {
+            background-color: #1c4385;
+        }
+
+        .content {
+
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 650px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .dropzone {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px;
+            padding: 20px;
+            border-width: 2px;
+            border-radius: 2px;
+            border-color: #cccccc;
+            border-style: dashed;
+            background-color: #fafafa;
+            outline: none;
+            transition: border .24s ease-in-out;
+            cursor: pointer;
+            background-image: url("https://storage.googleapis.com/public_colab_images/ai5/mushroom.svg");
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .prediction_label {
+            font-family: Roboto, sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="mdc-top-app-bar" style="align-items: center;position: relative;">
+        <div class="mdc-top-app-bar__row" style="max-width: 700px;">
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                <button class="material-icons mdc-top-app-bar__navigation-icon mdc-icon-button"
+                    aria-label="Open navigation menu">menu</button>
+                <span class="mdc-top-app-bar__title" style="font-weight: 900; font-size: 30px;">🍄 Mushroom
+                    Identifier</span>
+            </section>
+        </div>
+    </header>
+    <!-- Header -->
+
+    <!-- Content -->
+    <div class="content">
+        <div class="container">
+            <div class="mdc-card mdc-card--outlined" style="min-height: 400px;">
+                <div class="dropzone" onclick="upload_file()">
+
+                    <input type="file" id="input_file" accept="image/*" capture="camera" name="input_file" on
+                        autocomplete="off" tabindex="-1" style="display: none;">
+                    <div><img id="input_file_view" height="300px" /></div>
+                    <div style="color: #302f2f;">Click to take a picture or upload...</div>
+                </div>
+                <div style="padding:20px;">
+                    <div class="prediction_label" id="prediction_label"></div>
+                    <div class="prediction_acc" id="prediction_accuracy"></div>
+                    <span id="upload_file_results"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Content -->
+</body>
+<!-- Add Javascript -->
+<script>
+    // API URL
+    axios.defaults.baseURL = 'http://localhost:9000/';
+
+    // file input
+    var input_file = document.getElementById("input_file");
+    var prediction_label = document.getElementById("prediction_label");
+    var prediction_accuracy = document.getElementById("prediction_accuracy");
+    var input_file_view = document.getElementById('input_file_view');
+
+    function upload_file() {
+        // Clear
+        prediction_label.innerHTML = "";
+        input_file_view.src = null;
+
+        input_file.click();
+    }
+
+    function input_file_onchange() {
+        var file_to_upload = input_file.files[0];
+        input_file_view.src = URL.createObjectURL(file_to_upload);
+    }
+
+    // Attach an onchange event
+    input_file.onchange = input_file_onchange;
+</script>
+
+</html>

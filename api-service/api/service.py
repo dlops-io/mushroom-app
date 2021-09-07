@@ -4,6 +4,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from api.tracker import TrackerService
 import dataaccess.session as database_session
+from dataaccess import leaderboard
 
 # Initialize Tracker Service
 tracker_service = TrackerService()
@@ -48,3 +49,8 @@ async def get_index():
     return {
         "message": "Welcome to the API Service"
     }
+
+
+@app.get("/leaderboard")
+async def get_leaderboard():
+    return await leaderboard.browse()

@@ -78,7 +78,7 @@ from dataaccess import leaderboard
 ```
 @app.get("/leaderboard")
 async def get_leaderboard():
-    return leaderboard.browse()
+    return await leaderboard.browse()
 ```
 
 - You can access this new route from the browser at 'http://localhost:9000/leaderboard'
