@@ -2,11 +2,12 @@ import os
 import asyncio
 from fastapi import FastAPI, File
 from starlette.middleware.cors import CORSMiddleware
-from tempfile import TemporaryDirectory
 
 from api.tracker import TrackerService
 import dataaccess.session as database_session
 from dataaccess import leaderboard
+
+from tempfile import TemporaryDirectory
 from api import model
 
 # Initialize Tracker Service
