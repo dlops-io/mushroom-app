@@ -60,10 +60,22 @@ const Header = (props) => {
 
 
                     <div>
-                        <IconButton color="inherit">
+                        <IconButton color="inherit" component={Link} to="/">
+                            <Icon>home</Icon>
+                            <Typography variant="caption">&nbsp;Home</Typography>
+                        </IconButton>
+                        <IconButton color="inherit" component={Link} to="/leaderboard">
+                            <Icon>leaderboard</Icon>
+                            <Typography variant="caption">&nbsp;Leaderboard</Typography>
+                        </IconButton>
+                        <IconButton color="inherit" component={Link} to="/currentmodel">
+                            <Icon>model_training</Icon>
+                            <Typography variant="caption">&nbsp;Model</Typography>
+                        </IconButton>
+                        {/* <IconButton color="inherit">
                             <Icon>login</Icon>
                             <Typography variant="caption">&nbsp;Login</Typography>
-                        </IconButton>
+                        </IconButton> */}
                     </div>
                 </Toolbar>
             </AppBar>
