@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { withStyles } from '@material-ui/core';
+import Typography from '@material-ui/core/Typography';
 
 import styles from './styles';
 
@@ -18,6 +19,9 @@ const Footer = (props) => {
 
     return (
         <div className={classes.root}>
+            <Typography align='center'>
+                Mushroom Identifier App
+            </Typography>
 
         </div>
     );
