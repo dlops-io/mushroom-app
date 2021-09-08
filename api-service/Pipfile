@@ -23,6 +23,7 @@ pytest = "*"
 pytest-asyncio = "*"
 google-auth = "*"
 tensorflow = "*"
+tensorflow-hub = "*"
 
 [requires]
 python_version = "3.8"

@@ -777,7 +777,7 @@ docker run --rm --name $IMAGE_NAME -ti \
 
 ### Restart `api-service`
 - Exit from docker shell and run `docker-shell` to get back in
-- Add a python file [dataccess/session.py](https://github.com/dlops-io/mushroom-app/releases/download/v1.1/session.py)
+- Add a python file [dataaccess/session.py](https://github.com/dlops-io/mushroom-app/releases/download/v1.1/session.py)
 
 - Update `service.py` connect to database on startup
 - Add the following new imports

@@ -42,7 +42,6 @@
             flex-direction: column;
             align-items: center;
             margin: 20px;
-            padding: 20px;
             border-width: 2px;
             border-radius: 2px;
             border-color: #cccccc;
@@ -56,10 +55,17 @@
             background-position: center;
         }
 
-        .prediction_label {
+        .prediction {
             font-family: Roboto, sans-serif;
             font-size: 32px;
             font-weight: 900;
+        }
+
+        .mushroom_type {
+            font-family: Roboto, sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            color: #de2d26;
         }
     </style>
 </head>
@@ -86,13 +92,12 @@
 
                     <input type="file" id="input_file" accept="image/*" capture="camera" name="input_file" on
                         autocomplete="off" tabindex="-1" style="display: none;">
-                    <div><img id="input_file_view" height="300px" /></div>
+                    <div><img id="input_file_view" style="width:100%;" /></div>
                     <div style="color: #302f2f;">Click to take a picture or upload...</div>
                 </div>
                 <div style="padding:20px;">
-                    <div class="prediction_label" id="prediction_label"></div>
-                    <div class="prediction_acc" id="prediction_accuracy"></div>
-                    <span id="upload_file_results"></span>
+                    <span class="prediction" id="prediction_label"></span>
+                    <span class="mushroom_type" id="mushroom_type"></span>
                 </div>
             </div>
         </div>
@@ -108,6 +113,7 @@
     var input_file = document.getElementById("input_file");
     var prediction_label = document.getElementById("prediction_label");
     var prediction_accuracy = document.getElementById("prediction_accuracy");
+    var mushroom_type = document.getElementById("mushroom_type");
     var input_file_view = document.getElementById('input_file_view');
 
     function upload_file() {
@@ -119,8 +125,31 @@
     }
 
     function input_file_onchange() {
+        // Read the uploaded file and display it
         var file_to_upload = input_file.files[0];
         input_file_view.src = URL.createObjectURL(file_to_upload);
+        prediction_label.innerHTML = "";
+
+        // Post the image to the /predict API
+        var formData = new FormData();
+        formData.append("file", input_file.files[0]);
+        axios.post('/predict', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        }).then(function (response) {
+            var prediction_results = response.data;
+            console.log(prediction_results);
+
+            // Display the results
+            prediction_label.innerHTML = prediction_results["prediction_label"] + " (" + prediction_results["accuracy"] + "%)";
+            if (prediction_results["poisonous"]) {
+                mushroom_type.innerHTML = "&nbsp;&nbsp;Poisonous";
+            } else {
+                mushroom_type.innerHTML = "";
+            }
+
+        });
     }
 
     // Attach an onchange event
