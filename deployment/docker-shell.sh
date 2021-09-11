@@ -6,7 +6,7 @@ set -e
 # Define some environment variables
 export IMAGE_NAME="mushroom-app-deployment"
 export BASE_DIR=$(pwd)
-export GCP_PROJECT="ai5-project"
+export GCP_PROJECT="ai5-project" # Change to your GCP Project
 export GCP_ZONE="us-central1-a"
 export GOOGLE_APPLICATION_CREDENTIALS=/secrets/deployment.json
 

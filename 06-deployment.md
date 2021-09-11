@@ -74,6 +74,12 @@ The username is `sa_105148290446446408899`
 * GCP Compute instance details in inventory.yml file
 
 ## Deployment
+
+#### Build and Push Docker Containers to GCR
+```
+ansible-playbook deploy-docker-images.yml -i inventory.yml
+```
+
 #### Create Compute Instance (VM) Server in GCP
 ```
 ansible-playbook deploy-create-instance.yml -i inventory.yml --extra-vars cluster_state=present
@@ -83,11 +89,6 @@ Once the command runs successfully get the IP address of the compute instance fr
 #### Provision Dev Server in GCP
 ```
 ansible-playbook deploy-provision-instance.yml -i inventory.yml
-```
-
-#### Build and Push Docker Containers to GCR
-```
-ansible-playbook deploy-docker-images.yml -i inventory.yml
 ```
 
 #### Setup Docker Containers in the  Compute Instance
