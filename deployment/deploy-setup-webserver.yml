@@ -4,27 +4,6 @@
   become: true
 
   tasks:
-    # Setup secrets so containers can have access to GCP resources 
-    - name: Create secrets directory
-      file:
-        path: "/srv/secrets"
-        state: "directory"
-        mode: 0755 # Change to 0700
-    - name: Copy service account key file
-      copy:
-        src: ../secrets/gcp-service.json
-        dest: "/srv/secrets/gcp-service.json"
-        mode: 0644
-    - name: Authenticate gcloud using service account
-      shell: "gcloud auth activate-service-account --key-file /srv/secrets/gcp-service.json"
-    
-    # Create common network for all containers
-    - name: Create network
-      docker_network:
-          name: "{{docker_network_name}}"
-          driver: "bridge"
-          attachable: "yes"
-
     # Create and Setup Nginx
     - name: Copy nginx config files
       copy:
