@@ -1,6 +1,12 @@
 
 # Deployment to GCP
 
+## API's to enable in GCP before you begin
+* Compute Engine API
+* Service Usage API
+* Cloud Resource Manager API
+* Google Container Registry API
+
 ## Create a service account for deployment
 
 - Go to [GCP Console](https://console.cloud.google.com/home/dashboard), search for  "Service accounts" from the top search box. or go to: "IAM & Admins" > "Service accounts" from the top-left menu and create a new service account called "deployment". For "Service account permissions" select "Cloud Storage" > "Storage Bucket Reader". Then click done.
@@ -19,12 +25,6 @@
     - Storage Admin
 - For `gcp-service`:
     - Storage Object Viewer
-
-## API's to enable in GCP for project
-* Compute Engine API
-* Service Usage API
-* Cloud Resource Manager API
-* Google Container Registry API
 
 ## Start Docker Container (Ansible, Docker, Kubernetes)
 -  `cd deployment`
