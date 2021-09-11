@@ -1,0 +1,48 @@
+- name: Configure webserver on the server instance
+  hosts: appserver
+  connection: ssh
+  become: true
+
+  tasks:
+    # Setup secrets so containers can have access to GCP resources 
+    - name: Create secrets directory
+      file:
+        path: "/srv/secrets"
+        state: "directory"
+        mode: 0755 # Change to 0700
+    - name: Copy service account key file
+      copy:
+        src: ../secrets/gcp-service.json
+        dest: "/srv/secrets/gcp-service.json"
+        mode: 0644
+    - name: Authenticate gcloud using service account
+      shell: "gcloud auth activate-service-account --key-file /srv/secrets/gcp-service.json"
+    
+    # Create common network for all containers
+    - name: Create network
+      docker_network:
+          name: "{{docker_network_name}}"
+          driver: "bridge"
+          attachable: "yes"
+
+    # Create and Setup Nginx
+    - name: Copy nginx config files
+      copy:
+        src: "./nginx-conf/nginx"
+        dest: "/conf"
+    - name: Create nginx container
+      docker_container:
+        name: "nginx"
+        image: "nginx:stable"
+        state: started
+        recreate: yes
+        published_ports:
+          - 80:80
+          - 443:443
+        networks:
+          - name: "{{docker_network_name}}"
+        volumes:
+          - /conf/nginx/nginx.conf:/etc/nginx/nginx.conf
+
+    - name: "Restart nginx container"
+      shell: "docker container restart nginx"
