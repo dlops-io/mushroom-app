@@ -9,13 +9,8 @@
 
 ## Create a service account for deployment
 
-- Go to [GCP Console](https://console.cloud.google.com/home/dashboard), search for  "Service accounts" from the top search box. or go to: "IAM & Admins" > "Service accounts" from the top-left menu and create a new service account called "deployment". For "Service account permissions" select "Cloud Storage" > "Storage Bucket Reader". Then click done.
-- This will create a service account
-- On the right "Actions" column click the vertical ... and select "Create key". A prompt for Create private key for "bucket-reader" will appear select "JSON" and click create. This will download a Private key json file to your computer. Copy this json file into the **secrets** folder.
-- Rename the json key file to `deployment.json`
-- Follow the same process Create another service account called `gcp-service`
-
-- Go to "IAM & Admins" and give the following roles:
+- Go to [GCP Console](https://console.cloud.google.com/home/dashboard), search for  "Service accounts" from the top search box. or go to: "IAM & Admins" > "Service accounts" from the top-left menu and create a new service account called "deployment"
+- Give the following roles:
 - For `deployment`:
     - Compute Admin
     - Compute OS Login
@@ -23,8 +18,19 @@
     - Kubernetes Engine Admin
     - Service Account User
     - Storage Admin
-- For `gcp-service`:
+- Then click done.
+- This will create a service account
+- On the right "Actions" column click the vertical ... and select "Create key". A prompt for Create private key for "deployment" will appear select "JSON" and click create. This will download a Private key json file to your computer. Copy this json file into the **secrets** folder.
+- Rename the json key file to `deployment.json`
+- Follow the same process Create another service account called `gcp-service`
+- For `gcp-service` give the following roles:
     - Storage Object Viewer
+- Then click done.
+- This will create a service account
+- On the right "Actions" column click the vertical ... and select "Create key". A prompt for Create private key for "gcp-service" will appear select "JSON" and click create. This will download a Private key json file to your computer. Copy this json file into the **secrets** folder.
+- Rename the json key file to `gcp-service.json`
+
+- Go to "IAM & Admins" and +Add both the service accounts as memebers to the project
 
 ## Start Docker Container (Ansible, Docker, Kubernetes)
 -  `cd deployment`
