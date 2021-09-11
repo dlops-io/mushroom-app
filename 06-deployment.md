@@ -2,6 +2,7 @@
 # Deployment to GCP
 
 ## API's to enable in GCP before you begin
+Search for each of these in the GCP search bar and click enable to enable these API's
 * Compute Engine API
 * Service Usage API
 * Cloud Resource Manager API
