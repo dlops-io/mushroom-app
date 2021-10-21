@@ -351,19 +351,55 @@ async def get_index():
     }
 ```
 
-### Copy over `Pipfile` & `Pipfile.lock`
-- Since we will start with a similar Python environment as last class
-- Copy over [Pipfile](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/api-service/Pipfile)
-- Copy over [Pipfile.lock](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/api-service/Pipfile.lock)
+### Create Pipfile & Pipfile.lock files
+* Add `Pipfile` with a the following contents:
+```
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+
+[requires]
+python_version = "3.8"
+```
+
+* Add `Pipfile.lock` with a the following contents:
+```
+{
+    "_meta": {
+        "hash": {
+            "sha256": "7f7606f08e0544d8d012ef4d097dabdd6df6843a28793eb6551245d4b2db4242"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.8"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {},
+    "develop": {}
+}
+```
 
 ### Build & Run Container
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
 
+### Install required Python packages
+* `pipenv install `
+
 ### Start API Service
 - To run development API service run `uvicorn_server` from the docker shell
 - Test the API service by going to `http://localhost:9000/`
-
-
 
 ## Data Collector Container
 We will create a python container that can run scripts from the CLI. This can be used to run scripts to download images from Google
@@ -437,42 +473,3 @@ docker run  --rm --name %IMAGE_NAME% -ti ^
 - To test image download you can run the example command
 
 `python -m cli --nums 10 --search "oyster mushrooms" "crimini mushrooms" "amanita mushrooms" --opp "search"`
-
-## Setup Container with GCP Credentials
-Next step is to enable `data-collector` and `api-service` container to have access to GCP. We want these two container to take to GCP as show:
-
-![Docker setup for Mushroom App](https://storage.googleapis.com/public_colab_images/docker/docker_containers_mushroom_app3.png)
-
-### Setup GCP Service Account
-- This step has already been done since we want to connect the "common" model store you all published to in the Mushroom Classification competition. (The credentials file will be provided to you before this exercise)
-- Here are the step to create an account just for reference:
-- To setup a service account you will need to go to [GCP Console](https://console.cloud.google.com/home/dashboard), search for  "Service accounts" from the top search box. or go to: "IAM & Admins" > "Service accounts" from the top-left menu and create a new service account called "bucket-reader". For "Service account permissions" select "Cloud Storage" > "Storage Bucket Reader". Then click done.
-- This will create a service account
-- On the right "Actions" column click the vertical ... and select "Create key". A prompt for Create private key for "bucket-reader" will appear select "JSON" and click create. This will download a Private key json file to your computer. Copy this json file into the **secrets** folder.
-
-
-### Set GCP Credentials
-- To setup GCP Credentials in a container we need to set the environment variable `GOOGLE_APPLICATION_CREDENTIALS` inside the container to the path of the secrets file from the previous step
-- Update `docker-shell.sh` or `docker-shell.bat` in both `data-collector` and `api-service` to add the new environment variable
-
-`docker-shell.sh`
-```
-export GCP_PROJECT="ai5-project"
-export GCP_ZONE="us-central1-a"
-export GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json
-
--e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS \
--e GCP_PROJECT=$GCP_PROJECT \
--e GCP_ZONE=$GCP_ZONE \
-```
-
-`docker-shell.bat`
-```
-SET GCP_PROJECT="ai5-project"
-SET GCP_ZONE="us-central1-a"
-SET GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json
-
--e GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS ^
--e GCP_PROJECT=$GCP_PROJECT ^
--e GCP_ZONE=$GCP_ZONE ^
-```
