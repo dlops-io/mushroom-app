@@ -409,12 +409,12 @@ We will create a python container that can run scripts from the CLI. This can be
 
 ### Copy over the following files
 - We will start with a similar container as we did previously
-- Copy over [Dockerfile](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/download-images/Dockerfile)
-- Copy over [docker-entrypoint.sh](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/download-images/docker-entrypoint.sh)
-- Copy over [Pipfile](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/download-images/Pipfile)
-- Copy over [Pipfile.lock](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/download-images/Pipfile.lock)
-- Copy over [cli.py](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/download-images/cli.py)
-- Copy over [downloader.py](https://raw.githubusercontent.com/dlops-io/intro_to_containers/main/download-images/downloader.py)
+- Copy over [Dockerfile](https://raw.githubusercontent.com/dlops-io/mushroom-app/01-setup-first-3-containers/data-collector/Dockerfile)
+- Copy over [docker-entrypoint.sh](https://raw.githubusercontent.com/dlops-io/mushroom-app/01-setup-first-3-containers/data-collector/docker-entrypoint.sh)
+- Copy over [Pipfile](https://raw.githubusercontent.com/dlops-io/mushroom-app/01-setup-first-3-containers/data-collector/Pipfile)
+- Copy over [Pipfile.lock](https://raw.githubusercontent.com/dlops-io/mushroom-app/01-setup-first-3-containers/data-collector/Pipfile.lock)
+- Copy over [cli.py](https://raw.githubusercontent.com/dlops-io/mushroom-app/01-setup-first-3-containers/data-collector/cli.py)
+- Copy over [downloader.py](https://raw.githubusercontent.com/dlops-io/mushroom-app/01-setup-first-3-containers/data-collector/downloader.py)
 
 
 ### Add a `docker-shell.sh` or `docker-shell.bat`
