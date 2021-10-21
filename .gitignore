@@ -3,3 +3,6 @@
 geckodriver.log
 /persistent-folder
 /secrets
+/api-service
+/data-collector
+/frontend-simple
