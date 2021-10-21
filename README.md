@@ -395,7 +395,7 @@ python_version = "3.8"
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
 
 ### Install required Python packages
-* `pipenv install `
+* `pipenv install uvicorn fastapi`
 
 ### Start API Service
 - To run development API service run `uvicorn_server` from the docker shell
@@ -408,7 +408,7 @@ We will create a python container that can run scripts from the CLI. This can be
 - Open a terminal and go to the location where `mushroom-app/data-collector`
 
 ### Copy over the following files
-- We will start with a similar container as we did previously
+- We will start previously created files
 - Copy over [Dockerfile](https://raw.githubusercontent.com/dlops-io/mushroom-app/01-setup-first-3-containers/data-collector/Dockerfile)
 - Copy over [docker-entrypoint.sh](https://raw.githubusercontent.com/dlops-io/mushroom-app/01-setup-first-3-containers/data-collector/docker-entrypoint.sh)
 - Copy over [Pipfile](https://raw.githubusercontent.com/dlops-io/mushroom-app/01-setup-first-3-containers/data-collector/Pipfile)
