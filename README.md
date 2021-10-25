@@ -1,11 +1,11 @@
 # Mushroom App - Setup & Code Organization
 
-In this tutorial we will setup three containers:
+In this tutorial we will continue to work with the three containers from the previous tutorial:
 * api-service
 * data-collector
 * frontend-simple
 
-The following container architecture is what we will implement:
+The following container architecture is what we have implemented so far:
 
 ![Docker setup for Mushroom App](https://storage.googleapis.com/public_colab_images/docker/docker_containers_mushroom_app2.png)
 
