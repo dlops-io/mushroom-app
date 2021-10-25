@@ -7,7 +7,7 @@ In this tutorial we will setup three containers:
 
 The following container architecture is what we will implement:
 
-![Docker setup for Mushroom App](https://storage.googleapis.com/public_colab_images/docker/docker_containers_mushroom_app2.png)
+![Docker setup for Mushroom App](https://storage.googleapis.com/public_colab_images/docker/docker_containers_mushroom_app1.png)
 
 ## Prerequisites
 * Have Docker installed
