@@ -78,7 +78,7 @@ from google.cloud import storage
 
 
 gcp_project = os.environ["GCP_PROJECT"]
-bucket_name = "ai5-mushroom-app-models"
+bucket_name = "ac215-mushroom-app-models"
 persistent_folder = "/persistent"
 
 
