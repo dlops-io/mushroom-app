@@ -19,7 +19,7 @@ Next step is to have the `api-service` monitor the GCP bucket for any new models
 pipenv install tensorflow
 ```
 
-- Add a python file [api/tracker.py](https://github.com/dlops-io/mushroom-app/releases/download/v1.1/tracker.py)
+- Add a python file [api/tracker.py](https://github.com/dlops-io/mushroom-app/releases/download/v1.2/tracker.py)
 
 - Update `service.py` to initiate `TrackerService` and call it on startup
 - Add the following new imports
