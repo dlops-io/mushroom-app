@@ -11,7 +11,6 @@ The following container architecture is what we will implement:
 
 ## Prerequisites
 * Have Docker installed
-* Cloned this repository to your local machine with a terminal up and running
 * Check that your Docker is running with the following command
 
 `docker run hello-world`
