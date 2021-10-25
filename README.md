@@ -34,7 +34,7 @@ from api.tracker import TrackerService
 tracker_service = TrackerService()
 ```
 
-- Add startup and shutdown events, add this after "Enable CORSMiddleware"
+- Add startup and shutdown events, add this after "Enable CORSMiddleware" section
 ```
 @app.on_event("startup")
 async def startup():
@@ -50,6 +50,6 @@ async def shutdown():
 ```
 
 ### Run the API Service and test
-- Run `uvicorn_server` and wait for 60 seconds
+- Run `uvicorn_server` and wait for 60 seconds, check you `persistent-folder` and you will see a new folder called `experiments` gets created and all the users model metrics files will get downloaded
 
 
