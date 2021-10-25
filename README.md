@@ -56,15 +56,29 @@ and add set these environment variables when starting the docker container
 -e GCP_ZONE=$GCP_ZONE ^
 ```
 
-#### Test Reading from GCS Bucket
-* Create a test python script `test_bucket_access.py` inside `data-collector` and add the following content to it:
+### Test GCP Credentials
+- Restart both `data-collector` and `api-service` so that the new environment variables we added should take effect
+- Install `google-auth` & `google-cloud-storage` python packages
+- Run this in the `data-collector` docker shell
+```
+pipenv install google-auth google-cloud-storage
+```
+
+- Run this in `api-service` docker shell
+```
+pipenv install google-auth google-cloud-storage
+```
+
+- In the `data-collector` create a python file called `test_bucket_access.py` and add the following code to it
+
+`test_bucket_access.py`
 ```
 import os
 from google.cloud import storage
 
 
 gcp_project = os.environ["GCP_PROJECT"]
-bucket_name = "ac215-mushroom-app-models"
+bucket_name = "ai5-mushroom-app-models"
 persistent_folder = "/persistent"
 
 
@@ -80,11 +94,15 @@ def download_blob(bucket_name, source_blob_name, destination_file_name):
 
 print(gcp_project)
 
+# Test access
 download_file = "test-bucket-access.txt"
 download_blob(bucket_name, download_file,
               os.path.join(persistent_folder, download_file))
-
 ```
 
-* Run this script with `python test_bucket_access.py` and this should download a `test-bucket-access.txt` file
-* Do the same for `api-service` to ensure your container has access to the GCS bucket
+- Run the following
+```
+python test_bucket_access.py
+```
+
+If you followed all the steps above you should see a file called `test-bucket-access.txt` inside your `persistent-folder`. This file was copied from the GCP bucket over to your local folder. This ensures us we have read access to the GCP bucket.
