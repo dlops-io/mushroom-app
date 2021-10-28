@@ -73,7 +73,7 @@ In this section we will consume our leaderboard API and display a table of resul
         }
 
         .mdc-top-app-bar {
-            background-color: #1c4385;
+            background-color: #A41034;
         }
 
         .content {
