@@ -34,7 +34,7 @@ from api.tracker import TrackerService
 tracker_service = TrackerService()
 ```
 
-- Add startup and shutdown events, add this after "Enable CORSMiddleware" section
+- Add a startup event, add this after "Enable CORSMiddleware" section. This will call the tracker service when the API service starts running.
 ```
 @app.on_event("startup")
 async def startup():
@@ -42,11 +42,6 @@ async def startup():
     # Start the tracker service
     asyncio.create_task(tracker_service.track())
 
-
-@app.on_event("shutdown")
-async def shutdown():
-    # Shutdown tasks
-    ...
 ```
 
 ### Run the API Service and test
