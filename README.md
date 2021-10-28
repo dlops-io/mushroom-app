@@ -16,7 +16,17 @@ The following container architecture is what we have implemented so far:
 
 In this section we will read the leaderboard.csv and return it to the API as a list of json objects
 
+### Install pandas
+```
+pipenv install pandas
+```
+
 ### Add a new route `/leaderboard`
+- Add the follwoing import
+```
+import pandas as pd
+```
+
 - In the `api-service` folder in `api/service.py` add the code for the new route
 ```
 @app.get("/leaderboard")
