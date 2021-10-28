@@ -3,3 +3,9 @@
 geckodriver.log
 /persistent-folder
 /secrets
+/api-service
+/data-collector/docker-shell.sh
+/frontend-simple
+/frontend-react
+/database-server
+/deployment
