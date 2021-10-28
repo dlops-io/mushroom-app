@@ -593,7 +593,7 @@ In this section we will build a prediction page that allows upload of an image a
 
 ### Download the folder `frontent-react`
 - From the [repo](https://github.com/dlops-io/mushroom-app/tree/05-apis-frontend)
-- Download `frontent-react` inside your `mushroom-app` folder 
+- Download and unzip `frontent-react` inside your `mushroom-app` folder 
 - cd into `frontent-react`
 - Run `sh docker-shell.sh` or `docker-shell.bat` 
 - Wait for docker shell to start up
@@ -609,7 +609,7 @@ In this section we will build a prediction page that allows upload of an image a
 
 ## 🎉 Congratulations 🎉
 Now we have completed:
-* Reading data from a table in a **PostgreSQL** container. 
+* Reading data from a csv file in the persistent folder. 
 * Converted the data to list of dictionary objects in **Python** 
 * Exposed the results as a REST API using **FastAPI**
 * Called the API to get the leaderboard data
