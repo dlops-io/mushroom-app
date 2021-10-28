@@ -14,74 +14,33 @@ The following container architecture is what we have implemented so far:
 
 ## Create API for the leaderboard list [`api-service` Container]
 
-In this section we will query the database for the leaderboard and return it to the API as a list of json objects
+In this section we will read the leaderboard.csv and return it to the API as a list of json objects
 
-### First we will create a data access method
-- In the `api-service` folder under `dataaccess` create a new python file `leaderboard.py`
-- Add the following code block
-
-`leaderboard.py`
-```
-import os
-from typing import Any, Dict, List
-from dataaccess.session import database
-
-
-async def browse(
-    *,
-    limit: int = -1
-) -> List[Dict[str, Any]]:
-    """
-    Retrieve a list of rows based on filters
-    """
-
-    query = """
-        select *
-        from leaderboard
-    """
-
-    # limit
-    if limit > 0:
-        query += " limit " + str(limit)
-
-    print("query", query)
-    result = await database.fetch_all(query)
-
-    return [prep_data(row) for row in result]
-
-
-def prep_data(result) -> Dict[str, Any]:
-    if result is None:
-        raise ValueError("Tried to prepare null result")
-
-    result = dict(result)
-    return result
-```
-
-### Create an API route to expose return the leaderboard data
-- Modify `service.py` to call this database method to get the leaderboard data
-- Add the following import in `service.py`
-
-`service.py`
-```
-from dataaccess import leaderboard
-```
-
-- At the bottom of `service.py` add the following new route
-
-`service.py`
+### Add a new route `/leaderboard`
+- In the `api-service` folder in `api/service.py` add the code for the new route
 ```
 @app.get("/leaderboard")
-async def get_leaderboard():
-    return await leaderboard.browse()
+def leaderboard_fetch():
+    # Fetch leaderboard
+    df = pd.read_csv("/persistent/experiments/leaderboard.csv")
+
+    df["id"] = df.index
+    df = df.fillna('')
+
+    return df.to_dict('records')
 ```
+
+Here are reading the `leaderboard.csv` using pandas and returning it as json object in the API call
 
 - You can access this new route from the browser at 'http://localhost:9000/leaderboard'
 
 ### 🎉 What did we just do? 
-* We read some data from a table in a **PostgreSQL** container. 
+* We read some data from a csv file in the persistent folder. 
 * Converted the data to list of dictionary objects in **Python** 
 * Exposed the results as a REST API using **FastAPI**
+
+
+Next we will create a simple frontend page ot display the results.
 
 ## Create a leaderboard page [`frontend-simple` Container]
 
@@ -262,7 +221,7 @@ function buildLeaderboardTable(leaderboard) {
     leaderboard.forEach(function (item, index) {
         rows += "<tr class='MuiTableRow-root'>";
         rows += "<td class='MuiTableCell-root MuiTableCell-body'>" + item["id"] + "</td>";
-        rows += "<td class='MuiTableCell-root MuiTableCell-body'>" + item["email"] + "</td>";
+        rows += "<td class='MuiTableCell-root MuiTableCell-body'>" + item["user"] + "</td>";
         rows += "<td class='MuiTableCell-root MuiTableCell-body'>" + item["model_name"] + "</td>";
         rows += "<td class='MuiTableCell-root MuiTableCell-body'>" + item["trainable_parameters"] + "</td>";
         rows += "<td class='MuiTableCell-root MuiTableCell-body'>" + Math.round(item["execution_time"], 2) + "</td>";
@@ -289,7 +248,7 @@ buildLeaderboardTable(leaderboard);
 
 ### 🎉 Congratulations 🎉
 Now we have completed:
-* Reading data from a table in a **PostgreSQL** container. 
+* We read some data from a csv file in the persistent folder. 
 * Converted the data to list of dictionary objects in **Python** 
 * Exposed the results as a REST API using **FastAPI**
 * Called the API to get the leaderboard data
