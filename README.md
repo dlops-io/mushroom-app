@@ -22,7 +22,7 @@ pipenv install pandas
 ```
 
 ### Add a new route `/leaderboard`
-- Add the follwoing import
+- Add the following import
 ```
 import pandas as pd
 ```
