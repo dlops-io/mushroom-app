@@ -6,3 +6,5 @@ geckodriver.log
 /api-service
 /data-collector/docker-shell.sh
 /frontend-simple
+/frontend-react
+/database-server
