@@ -216,7 +216,7 @@ In this section we will consume our leaderboard API and display a table of resul
 - What do you see?
 - There should be an array with the leaderboard data
 
-### First we add a new HTML page 
+### Update HTML page to display data
 - Build the HTML table with the leaderboard data
 - Open `leaderboard.html` file and add this code to the end of the `<script>...</script>` block:
 
