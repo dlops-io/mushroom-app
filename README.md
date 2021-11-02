@@ -608,7 +608,7 @@ In this section we will build a prediction page that allows upload of an image a
 ## Frontend App using React
 
 ### Download the folder `frontent-react`
-- From the [repo](https://github.com/dlops-io/mushroom-app/tree/05-apis-frontend)
+- From this [link](https://github.com/dlops-io/mushroom-app/releases/download/v1.2/frontend-react.zip)
 - Download and unzip `frontent-react` inside your `mushroom-app` folder 
 - cd into `frontent-react`
 - Run `sh docker-shell.sh` or `docker-shell.bat` 
