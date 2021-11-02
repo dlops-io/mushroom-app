@@ -268,9 +268,9 @@ Now we have completed:
 
 In this section we serve our best model from the leaderboard as an API
 
-### Install Tensorflow Hub
+### Install Tensorflow Hub / Multipart
 - Exit from `uvicorn_server`
-- Run `pipenv install tensorflow_hub`
+- Run `pipenv install tensorflow_hub python-multipart`
 
 ### Add file `api/model.py`
 
@@ -366,6 +366,10 @@ def make_prediction(image_path):
     idx = prediction.argmax(axis=1)[0]
     prediction_label = data_details["index2label"][str(idx)]
 
+    if prediction_model.layers[-1].activation.__name__ != 'softmax':
+        prediction = tf.nn.softmax(prediction).numpy()
+        print(prediction)
+
     poisonous = False
     if prediction_label == "amanita":
         poisonous = True
@@ -381,9 +385,11 @@ def make_prediction(image_path):
 
 ```
 
-### Add a two new routes in `service.py`
+### Add two new routes in `service.py`
 - Add the following imports to `service.py`
 ```
+import os
+from fastapi import File
 from tempfile import TemporaryDirectory
 from api import model
 ```
