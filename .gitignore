@@ -3,3 +3,4 @@
 geckodriver.log
 /persistent-folder
 /secrets
+/deployment
