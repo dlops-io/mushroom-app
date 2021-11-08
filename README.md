@@ -42,9 +42,10 @@ Check version of installed Docker
 ### Create folder and give permissions
 * `sudo mkdir persistent-folder`
 * `sudo mkdir secrets`
+* `sudo chmod 0755 conf -r`
 * `sudo chmod 0777 persistent-folder`
 * `sudo chmod 0755 secrets`
-
+* `sudo chmod -R 0755 conf`
 
 ### Add secrets file
 * Create a file `bucket-reader.json` inside `secrets` folder with the secrets json provided
@@ -62,7 +63,7 @@ Check version of installed Docker
     - Add the network tags: `fast-api-rule`, `http-server`, `https-server`
 
 ### Run api-service
-Run the app using the following command
+Run the container using the following command
 ```
 sudo docker run -d --name mushroom-app-api-service \
 --mount type=bind,source="$(pwd)/persistent-folder/",target=/persistent \
@@ -75,17 +76,27 @@ sudo docker run -d --name mushroom-app-api-service \
 
 If you want to run in interactive mode like we id in development:
 ```
-sudo docker run --rm -ti --name mushroom-app-api-service --mount type=bind,source="$(pwd)/persistent-folder/",target=/persistent --mo
-unt type=bind,source="$(pwd)/secrets/",target=/secrets -p 9000:9000 -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json -e GCP_PROJECT=ac215-project -e GCP_ZON
-E=us-central1-a -e DEV=1 dlops/mushroom-app-api-service
+sudo docker run --rm -ti --name api-service --mount type=bind,source="$(pwd)/persistent-folder/",target=/persistent --mount type=bind,source="$(pwd)/secrets/",target=/secrets -p 9000:9000 -e GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json -e GCP_PROJECT=ac215-project -e GCP_ZONE=us-central1-a -e DEV=1 dlops/mushroom-app-api-service
 ```
 
 You can access the deployed API using `http://<Your VM IP Address>:9000/docs`
 
 ### Run frontend
-Run the app using the following command
+Run the container using the following command
 ```
-sudo docker run -d --name mushroom-app-frontend -p 80:80 dlops/mushroom-app-frontend
+sudo docker run -d --name frontend -p 3000:80 dlops/mushroom-app-frontend
 ```
 
-You can access the deployed API using `http://104.155.188.216/`
+You can access the deployed API using `http://<Your VM IP Address>/`
+
+### Add NGINX config file
+* Download file `nginx.conf`
+```
+sudo curl -o conf/nginx/nginx.conf https://github.com/dlops-io/mushroom-app/releases/download/v1.2/nginx.conf
+```
+
+### Run NGINX Web Server
+Run the app using the following command
+```
+sudo docker run -d --name nginx -v /conf/nginx/nginx.conf:/etc/nginx/nginx.conf  -p 80:80 nginx:stable
+```
