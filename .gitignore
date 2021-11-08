@@ -6,3 +6,6 @@ geckodriver.log
 /api-service
 /frontend-react
 /frontend-simple
+/data-collector
+/deployment
+/database-server
