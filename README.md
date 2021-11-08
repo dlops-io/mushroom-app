@@ -138,7 +138,7 @@ ansible-playbook deploy-setup-webserver.yml -i inventory.yml
 ```
 Once the command runs go to `http://<External IP>/` 
 
-#### Delete the Compute Instance / IP / Persistent disk
+## **Delete the Compute Instance / Persistent disk**
 ```
 ansible-playbook deploy-create-instance.yml -i inventory.yml --extra-vars cluster_state=absent
 ```
