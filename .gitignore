@@ -3,3 +3,6 @@
 geckodriver.log
 /persistent-folder
 /secrets
+/api-service
+/frontend-react
+/frontend-simple
