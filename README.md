@@ -59,7 +59,7 @@ Now you have a Docker container that connects to your GCP and call create VMs, d
 ## SSH Setup
 ### Configuring OS Login for service account
 ```
-gcloud compute project-info add-metadata --project ac215-project --metadata enable-oslogin=TRUE
+gcloud compute project-info add-metadata --project <YOUR GCP_PROJECT> --metadata enable-oslogin=TRUE
 ```
 
 ### Create SSH key for service account
