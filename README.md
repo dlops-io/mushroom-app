@@ -97,7 +97,7 @@ sudo docker run -d --name frontend -p 3000:80 --network mushroom-app dlops/mushr
 ```
 
 ### Add NGINX config file
-* Download file `nginx.conf`
+* Create `nginx.conf`
 ```
 echo 'user  nginx;
 error_log  /var/log/nginx/error.log warn;
