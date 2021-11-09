@@ -33,6 +33,9 @@ In this tutorial we will deploy the Mushroom App to GCP. For this we will create
 
 ### Install Docker on VM
 * Create a VM Instance from [GCP](https://console.cloud.google.com/compute/instances)
+* When creating the VM, you can select all the default values but ensure to select:
+	- Allow HTTP traffic
+	- Allow HTTPS traffic
 * SSH into your newly created instance
 Install Docker on the newly created instance by running
 * `curl -fsSL https://get.docker.com -o get-docker.sh`
