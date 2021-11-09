@@ -167,3 +167,34 @@ sudo docker run -d --name nginx -v $(pwd)/conf/nginx/nginx.conf:/etc/nginx/nginx
 ```
 
 You can access the deployed API using `http://<Your VM IP Address>/`
+
+
+## Debugging Containers
+
+If you want to debug any of the containers to see if something is wrong
+
+* View running containers
+```
+sudo docker container ls
+```
+
+* View images
+```
+sudo docker image ls
+```
+
+* View logs
+```
+sudo docker container logs api-service -f
+sudo docker container logs frontend -f
+sudo docker container logs nginx -f
+```
+
+* Get into shell
+```
+sudo docker exec -it api-service /bin/bash
+sudo docker exec -it frontend /bin/bash
+sudo docker exec -it nginx /bin/bash
+```
+
+
