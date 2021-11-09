@@ -41,6 +41,7 @@ Rather than each of installing different tools for deployment we will use Docker
 - From this [link](https://github.com/dlops-io/mushroom-app/releases/download/v1.2/deployment.zip)
 - Download and unzip `deployment` inside your `mushroom-app` folder 
 - cd into `deployment`
+- Go into `docker-shell.sh` or `docker-shell.bat` and change `GCP_PROJECT` to your project id
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
 
 - Check versions of tools:
