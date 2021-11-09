@@ -22,6 +22,7 @@ In this tutorial we will deploy the Mushroom App to GCP. For this we will create
 * Push to Docker Hub: `docker push <USER NAME>/mushroom-app-api-service`
 
 ### Build, Tag & Push frontend-react
+* The reason we need to rebuild the frontend is we are building th react app for production release. So we use the `Dockerfile` instead of the `Docker.dev` file
 * Inside the folder`frontend-react` 
 * Run `docker build -t mushroom-app-frontend -f Dockerfile .`
 * Tag the Docker Image: `docker tag mushroom-app-frontend <USER NAME>/mushroom-app-frontend`
