@@ -38,6 +38,45 @@ kubectl get componentstatuses
 kubectl get nodes
 ```
 
+### Create a Deployment Yaml file
+* Add a file called `deploy-k8s-tic-tac-toe.yml` inside the deployment folder
+* Add the following script:
+```
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      run: web
+  template:
+    metadata:
+      labels:
+        run: web
+    spec:
+      containers:
+      - image: dlops/tic-tac-toe
+        imagePullPolicy: IfNotPresent
+        name: web
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    run: web
+  type: LoadBalancer
+```
 
 ### Deploy the App
 ```
