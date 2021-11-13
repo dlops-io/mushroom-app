@@ -26,6 +26,13 @@ We have already done this in the deployment tutorial but in case you have not do
 gcloud container clusters create test-cluster --num-nodes 2 --zone us-east1-c
 ```
 
+### Checkout the cluster in GCP
+* Go to the Kubernetes Engine menu item to see the cluster details
+    - Click on the cluster name to see the cluster details
+    - Click on the Nodes tab to view the nodes
+    - Click on any node to see the pods running in the node
+* Go to the Compute Engine menu item to see the VMs in the cluster
+
 ### Try some kubectl commands
 ```
 kubectl get all
@@ -87,6 +94,10 @@ kubectl apply -f deploy-k8s-tic-tac-toe.yml
 ```
 kubectl get services
 ```
+
+### View the App
+* Copy the `External IP` from the `kubectl get services`
+* Go to `http://<YOUR EXTERNAL IP>`
 
 
 ### Delete Cluster
