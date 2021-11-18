@@ -131,27 +131,6 @@ We will use ansible to create and deploy the mushroom app into a Kubernetes Clus
       var: tag
     when: cluster_state == "present"
 
-  - name: Create secrets directory
-    file:
-      path: "/srv/secrets"
-      state: "directory"
-      mode: 0755
-    when: cluster_state == "present"
-  
-  - name: Create persistent directory
-    file:
-      path: "/srv/persistent"
-      state: "directory"
-      mode: 0777
-    when: cluster_state == "present"
-
-  - name: Copy bucket reader key file
-    copy:
-      src: ../secrets/bucket-reader.json
-      dest: "/srv/secrets/bucket-reader.json"
-      mode: 0644
-    when: cluster_state == "present"
-
   - name: "Create Persistent Volume Claim"
     k8s:
       state: present
@@ -173,6 +152,13 @@ We will use ansible to create and deploy the mushroom app into a Kubernetes Clus
     shell: |
       #!/bin/bash
       kubectl create secret generic bucket-reader-key --from-file=bucket-reader.json=../secrets/bucket-reader.json --namespace="{{cluster_name}}-namespace"
+    register: create_secret_op
+    ignore_errors: yes
+    when: cluster_state == "present"
+  
+  - name: "Print Create Secret Output"
+    debug:
+      var: create_secret_op
     when: cluster_state == "present"
   
   - name: "Create Deployment for Frontend"
