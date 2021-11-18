@@ -20,7 +20,7 @@ Search for each of these in the GCP search bar and click enable to enable these 
 - Run `gcloud auth list`
 
 ## Build and Push Docker Containers to GCR
-This step is only required if you have not already done this
+**This step is only required if you have NOT already done this**
 ```
 ansible-playbook deploy-docker-images.yml -i inventory.yml
 ```
@@ -372,6 +372,10 @@ kubectl get pods --namespace=mushroom-app-cluster-namespace
 kubectl get pod api-5d4878c545-47754 --namespace=mushroom-app-cluster-namespace
 kubectl exec --stdin --tty api-5d4878c545-47754 --namespace=mushroom-app-cluster-namespace  -- /bin/bash
 ```
+
+### View the App
+* Copy the `nginx_ingress_ip` from the terminal from the create cluster command
+* Go to `http://<YOUR INGRESS IP>.sslip.io`
 
 ### Delete Cluster
 ```
