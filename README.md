@@ -466,7 +466,7 @@ docker run  --rm --name %IMAGE_NAME% -ti ^
 - Run `sh docker-shell.sh` or `docker-shell.bat` for windows
 
 ### Start Data Collector Container
-- Test the container is up and running, run `python --version` in the docker shell to verify the version is `3.7.11`
+- Test the container is up and running, run `python --version` in the docker shell to verify the version is `3.8`
 
 - To test image download you can run the example command
 
