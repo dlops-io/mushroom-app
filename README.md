@@ -28,7 +28,7 @@ Next step is to enable `data-collector` and `api-service` container to have acce
 
 `docker-shell.sh`
 ```
-export GCP_PROJECT="ac215-project"
+export GCP_PROJECT="ai5-project"
 export GCP_ZONE="us-central1-a"
 export GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json
 ```
@@ -43,7 +43,7 @@ and add set these environment variables when starting the docker container
 
 `docker-shell.bat`
 ```
-SET GCP_PROJECT="ac215-project"
+SET GCP_PROJECT="ai5-project"
 SET GCP_ZONE="us-central1-a"
 SET GOOGLE_APPLICATION_CREDENTIALS=/secrets/bucket-reader.json
 ```
@@ -78,7 +78,7 @@ from google.cloud import storage
 
 
 gcp_project = os.environ["GCP_PROJECT"]
-bucket_name = "ac215-mushroom-app-models"
+bucket_name = "ai5-mushroom-app-models"
 persistent_folder = "/persistent"
 
 
