@@ -13,10 +13,10 @@ The following container architecture is what we have implemented so far:
 Next step is to have the `api-service` monitor the GCP bucket for any new models and pull download the best model. We will also keep track of a leaderboard.
 
 ### Setup a Tracker
-- Install Tensorflow
+- Install Tensorflow, Pandas
 - Run this in `api-service` docker shell
 ```
-pipenv install tensorflow
+pipenv install tensorflow pandas
 ```
 
 - Add a python file [api/tracker.py](https://github.com/dlops-io/mushroom-app/releases/download/v1.2/tracker.py)
