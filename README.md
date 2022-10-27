@@ -57,19 +57,15 @@ and add set these environment variables when starting the docker container
 ```
 
 ### Test GCP Credentials
-- Restart both `data-collector` and `api-service` so that the new environment variables we added should take effect
+- Restart `api-service` so that the new environment variables we added should take effect
 - Install `google-auth` & `google-cloud-storage` python packages
-- Run this in the `data-collector` docker shell
+- Run this in the `api-service` docker shell
 ```
 pipenv install google-auth google-cloud-storage
 ```
 
-- Run this in `api-service` docker shell
-```
-pipenv install google-auth google-cloud-storage
-```
 
-- In the `data-collector` create a python file called `test_bucket_access.py` and add the following code to it
+- In the `api-service` create a python file called `test_bucket_access.py` and add the following code to it
 
 `test_bucket_access.py`
 ```
