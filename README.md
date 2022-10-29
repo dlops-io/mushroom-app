@@ -16,10 +16,6 @@ The following container architecture is what we have implemented so far:
 
 In this section we will read the leaderboard.csv and return it to the API as a list of json objects
 
-### Install pandas
-```
-pipenv install pandas
-```
 
 ### Add a new route `/leaderboard`
 - Add the following import
@@ -83,7 +79,7 @@ In this section we will consume our leaderboard API and display a table of resul
         }
 
         .mdc-top-app-bar {
-            background-color: #A41034;
+            background-color: #1c4385;
         }
 
         .content {
