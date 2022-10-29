@@ -38,7 +38,7 @@ Search for each of these in the GCP search bar and click enable to enable these 
 Rather than each of installing different tools for deployment we will use Docker to build and run a standard container will all required software.
 
 ### Download the folder `deployment`
-- From this [link](https://github.com/dlops-io/mushroom-app/releases/download/v1.2/deployment.zip)
+- From this [link](https://github.com/dlops-io/mushroom-app/releases/download/ai5/deployment.zip)
 - Download and unzip `deployment` inside your `mushroom-app` folder 
 - cd into `deployment`
 - Go into `docker-shell.sh` or `docker-shell.bat` and change `GCP_PROJECT` to your project id
