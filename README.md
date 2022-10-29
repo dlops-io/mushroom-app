@@ -75,10 +75,10 @@ gcloud compute os-login ssh-keys add --key-file=/secrets/ssh-key-deployment.pub
 ```
 From the output of the above command keep note of the username. Here is a snippet of the output 
 ```
-- accountId: ac215-project
+- accountId: ai5-project
     gid: '3906553998'
     homeDirectory: /home/sa_100110341521630214262
-    name: users/deployment@ac215-project.iam.gserviceaccount.com/projects/ac215-project
+    name: users/deployment@ai5-project.iam.gserviceaccount.com/projects/ai5-project
     operatingSystemType: LINUX
     primary: true
     uid: '3906553998'
