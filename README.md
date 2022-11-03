@@ -68,7 +68,7 @@ We will use ansible to create and deploy the mushroom app into a Kubernetes Clus
       project: "{{ gcp_project }}"
       config:
         machine_type: "{{ machine_type }}"
-        image_type: "COS"
+        image_type: "cos_containerd"
         disk_size_gb: "{{ machine_disk_size }}"
         oauth_scopes:
           - "https://www.googleapis.com/auth/devstorage.read_only"
@@ -87,6 +87,10 @@ We will use ansible to create and deploy the mushroom app into a Kubernetes Clus
       auth_kind: "{{ gcp_auth_kind }}"
       service_account_file: "{{ gcp_service_account_file }}"
       state: "{{ cluster_state }}"
+  
+  # - name: "Connect to cluster (update kubeconfig)"
+  #   shell: "gcloud container clusters get-credentials {{ cluster.name }} --zone {{ gcp_zone }} --project {{ gcp_project }}"
+  #   when: cluster_state == "present"
   
   - name: "Connect to cluster (update kubeconfig)"
     shell: "gcloud container clusters get-credentials {{ cluster.name }} --zone {{ gcp_zone }} --project {{ gcp_project }}"
